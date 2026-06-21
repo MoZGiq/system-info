@@ -29,3 +29,7 @@
 ## 📜 Лицензия
 
 MIT License
+
+## Проверено в VirusTotal [https://www.virustotal.com/gui/home/upload]
+<img width="1918" height="839" alt="image" src="https://github.com/user-attachments/assets/407f8694-4bc0-4d25-8a75-53a5bcd8a893" />
+<img width="1859" height="867" alt="image" src="https://github.com/user-attachments/assets/68abbe58-ccff-4f8d-b404-6155fb51d81a" />
