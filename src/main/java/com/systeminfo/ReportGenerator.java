@@ -26,7 +26,7 @@ public class ReportGenerator {
         sb.append("  ╔═══════════════════════════════════════════════════════════════════╗\n");
         sb.append("  ║          🖥  ОТЧЁТ О ХАРАКТЕРИСТИКАХ КОМПЬЮТЕРА  🖥               ║\n");
         sb.append("  ║          Дата: ").append(String.format("%-50s", date)).append("  ║\n");
-        sb.append("  ║          System Info Collector v2.0                               ║\n");
+        sb.append("  ║          System Info v2.0                               ║\n");
         sb.append("  ╚═══════════════════════════════════════════════════════════════════╝\n\n");
 
         int sectionNum = 1;

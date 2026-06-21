@@ -23,7 +23,7 @@ public class WelcomeDialog {
      * Показывает окно приветствия. После закрытия запускается основной диалог.
      */
     public void show() {
-        frame = new JFrame("Добро пожаловать — System Info Collector");
+        frame = new JFrame("Добро пожаловать — System Info");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(700, 720);
         frame.setLocationRelativeTo(null);

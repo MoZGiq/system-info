@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.systeminfo</groupId>
-    <artifactId>system-info-collector</artifactId>
+    <artifactId>system-info</artifactId>
     <version>2.0</version>
     <packaging>jar</packaging>
 
-    <name>System Info Collector</name>
+    <name>System Info</name>
+    <description>Программа сбора характеристик компьютера</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -17,7 +18,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- Репозитории для гарантии загрузки -->
     <repositories>
         <repository>
             <id>central</id>
@@ -26,23 +26,12 @@
         </repository>
     </repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>central</id>
-            <name>Maven Central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <dependencies>
-        <!-- OSHI: системная информация -->
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>6.6.5</version>
         </dependency>
-
-        <!-- SLF4J -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -56,10 +45,9 @@
     </dependencies>
 
     <build>
-        <finalName>SystemInfoCollector</finalName>
+        <finalName>SystemInfo</finalName>
 
         <plugins>
-            <!-- Компилятор Java 17 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -70,7 +58,6 @@
                 </configuration>
             </plugin>
 
-            <!-- ⭐ Shade Plugin (стабильная версия 3.5.1) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
