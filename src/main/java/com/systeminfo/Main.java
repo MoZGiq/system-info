@@ -15,7 +15,7 @@ public class Main {
             if (prefs.hasAgreedToTerms()) {
                 // Пользователь уже согласился — сразу к выбору категорий
                 System.out.println("Пользователь уже принял гарантии (" + prefs.getAgreementDate() + ")");
-                new ConsentDialog().showConsentDialog();ы
+                new ConsentDialog().showConsentDialog();
             } else {
                 // Первый запуск — показываем гарантии
                 System.out.println("Первый запуск — показываем гарантии");

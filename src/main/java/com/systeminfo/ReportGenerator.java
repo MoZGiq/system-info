@@ -7,16 +7,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-/**
- * Генерирует красивый HTML-отчёт с анимированным фоном.
- */
 public class ReportGenerator {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
-    /**
-     * Генерирует текстовое представление для показа в окне результатов.
-     */
     public static String generateTextReport(Map<String, Map<String, String>> data) {
         StringBuilder sb = new StringBuilder();
         String date = LocalDateTime.now().format(FMT);
@@ -68,9 +62,6 @@ public class ReportGenerator {
         return sb.toString();
     }
 
-    /**
-     * Сохраняет отчёт как красивый HTML-файл с анимированным фоном.
-     */
     public static void saveToHtml(Map<String, Map<String, String>> data, String filePath) throws IOException {
         StringBuilder html = new StringBuilder();
         String date = LocalDateTime.now().format(FMT);
@@ -85,17 +76,24 @@ public class ReportGenerator {
                   <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     
+                    /* ⭐ ИСПРАВЛЕНИЕ ФОНА ПРИ СКРОЛЛЕ */
+                    html {
+                      min-height: 100%;
+                      background: #0c0c1d;
+                    }
+                    
                     html, body {
-                      min-height: 100vh;
                       font-family: 'Segoe UI', 'Inter', Tahoma, sans-serif;
                       color: #e0e0e0;
                       overflow-x: hidden;
                     }
                     
-                    /* ⭐ АНИМИРОВАННЫЙ ФОН */
+                    /* ⭐ АНИМИРОВАННЫЙ ФИКСИРОВАННЫЙ ФОН */
                     body {
+                      min-height: 100vh;
                       background: linear-gradient(-45deg, #0c0c1d, #1a1a3e, #2d1b69, #1e3a5f, #0c0c1d);
                       background-size: 400% 400%;
+                      background-attachment: fixed;
                       animation: gradientShift 15s ease infinite;
                       position: relative;
                       padding: 30px;
@@ -107,7 +105,7 @@ public class ReportGenerator {
                       100% { background-position: 0% 50%; }
                     }
                     
-                    /* ⭐ ЗВЁЗДЫ НА ФОНЕ */
+                    /* ⭐ ЗВЁЗДЫ — ФИКСИРОВАННЫЕ */
                     body::before {
                       content: '';
                       position: fixed;
@@ -132,7 +130,7 @@ public class ReportGenerator {
                       to { background-position: 200px 200px; }
                     }
                     
-                    /* ⭐ ПЛАВАЮЩИЕ ЧАСТИЦЫ */
+                    /* ⭐ ПЛАВАЮЩИЕ ЧАСТИЦЫ — ФИКСИРОВАННЫЕ */
                     body::after {
                       content: '';
                       position: fixed;
@@ -160,7 +158,6 @@ public class ReportGenerator {
                       z-index: 1;
                     }
                     
-                    /* ⭐ ЗАГОЛОВОК С СИЯНИЕМ */
                     .header {
                       text-align: center;
                       padding: 40px 20px;
@@ -236,7 +233,6 @@ public class ReportGenerator {
                       z-index: 1;
                     }
                     
-                    /* ⭐ СЕКЦИИ С АНИМАЦИЕЙ */
                     .section {
                       background: rgba(255,255,255,0.06);
                       backdrop-filter: blur(15px);
@@ -342,7 +338,6 @@ public class ReportGenerator {
                       font-family: 'Consolas', 'Courier New', monospace;
                     }
                     
-                    /* ⭐ ФУТЕР */
                     .footer {
                       text-align: center;
                       color: #6b7280;
@@ -372,7 +367,6 @@ public class ReportGenerator {
                       50% { transform: scale(1.2); }
                     }
                     
-                    /* ⭐ СКРОЛЛБАР */
                     ::-webkit-scrollbar {
                       width: 12px;
                     }
@@ -390,9 +384,8 @@ public class ReportGenerator {
                       background: linear-gradient(180deg, #818cf8, #a78bfa);
                     }
                     
-                    /* ⭐ ПЕЧАТЬ */
                     @media print {
-                      body { 
+                      html, body { 
                         background: white !important; 
                         color: #333 !important; 
                         padding: 10px; 
@@ -415,7 +408,6 @@ public class ReportGenerator {
                       td:last-child { color: #333 !important; }
                     }
                     
-                    /* ⭐ МОБИЛЬНАЯ ВЕРСИЯ */
                     @media (max-width: 768px) {
                       body { padding: 15px; }
                       .header h1 { font-size: 22px; }
@@ -465,9 +457,6 @@ public class ReportGenerator {
         }
     }
 
-    /**
-     * Экранирование HTML-символов.
-     */
     private static String escapeHtml(String text) {
         if (text == null) return "";
         return text.replace("&", "&amp;").replace("<", "&lt;")
