@@ -23,7 +23,7 @@ public class ConsentDialog {
     public void showConsentDialog() {
         JFrame frame = new JFrame("Сбор информации о системе");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(680, 620);
+        frame.setSize(680, 680);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
@@ -115,7 +115,11 @@ public class ConsentDialog {
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         mainPanel.add(scroll, BorderLayout.CENTER);
 
-        // ===== Кнопки =====
+        // ===== НИЖНЯЯ ПАНЕЛЬ С КНОПКАМИ =====
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
+
+        // Основные кнопки (Согласен / Отказаться)
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton agreeButton = createStyledButton(
@@ -157,7 +161,47 @@ public class ConsentDialog {
 
         buttonPanel.add(agreeButton);
         buttonPanel.add(declineButton);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // ⭐ НОВАЯ ПАНЕЛЬ: кнопка "Прочитать гарантии заново"
+        JPanel termsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        termsPanel.setBorder(new EmptyBorder(0, 0, 5, 0));
+
+        JButton showTermsBtn = new JButton("🔒 Прочитать гарантии конфиденциальности заново");
+        showTermsBtn.setFont(new Font("SansSerif", Font.ITALIC, 12));
+        showTermsBtn.setForeground(new Color(33, 100, 200));
+        showTermsBtn.setBackground(null);
+        showTermsBtn.setBorderPainted(false);
+        showTermsBtn.setContentAreaFilled(false);
+        showTermsBtn.setFocusPainted(false);
+        showTermsBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Эффект подчёркивания при наведении
+        showTermsBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                showTermsBtn.setText("<html><u>🔒 Прочитать гарантии конфиденциальности заново</u></html>");
+                showTermsBtn.setForeground(new Color(20, 60, 150));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                showTermsBtn.setText("🔒 Прочитать гарантии конфиденциальности заново");
+                showTermsBtn.setForeground(new Color(33, 100, 200));
+            }
+        });
+
+        showTermsBtn.addActionListener(e -> {
+            frame.dispose();
+            // Показываем окно гарантий
+            new WelcomeDialog().show();
+        });
+
+        termsPanel.add(showTermsBtn);
+
+        // Добавляем обе панели снизу
+        southPanel.add(buttonPanel);
+        southPanel.add(termsPanel);
+
+        mainPanel.add(southPanel, BorderLayout.SOUTH);
 
         frame.setContentPane(mainPanel);
         frame.setVisible(true);
@@ -195,25 +239,16 @@ public class ConsentDialog {
         return button;
     }
 
-    /**
-     * Получает путь к Рабочему столу пользователя.
-     */
     private String getDesktopPath() {
         return System.getProperty("user.home") + File.separator + "Desktop";
     }
 
-    /**
-     * Генерирует полный путь к файлу отчёта на Рабочем столе.
-     */
     private String buildReportPath() {
         String timestamp = java.time.LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
         return getDesktopPath() + File.separator + "system_report_" + timestamp + ".html";
     }
 
-    /**
-     * Собирает данные и сохраняет на Рабочий стол.
-     */
     private void collectAndSave() {
         JFrame progressFrame = new JFrame("Сбор данных...");
         progressFrame.setSize(450, 130);
@@ -271,9 +306,6 @@ public class ConsentDialog {
         worker.execute();
     }
 
-    /**
-     * Показывает финальное окно "УСПЕХ" с одной кнопкой "Закрыть" по центру.
-     */
     private void showSuccessDialog(String savedPath) {
         JFrame frame = new JFrame("Успех");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -299,13 +331,11 @@ public class ConsentDialog {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setOpaque(false);
 
-        // Большая галочка
         JLabel iconLabel = new JLabel("✅", SwingConstants.CENTER);
         iconLabel.setFont(new Font("SansSerif", Font.PLAIN, 72));
         iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         centerPanel.add(iconLabel);
 
-        // Заголовок
         JLabel titleLabel = new JLabel("УСПЕХ!", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 32));
         titleLabel.setForeground(new Color(27, 94, 32));
@@ -313,7 +343,6 @@ public class ConsentDialog {
         titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
         centerPanel.add(titleLabel);
 
-        // Сообщение
         JLabel messageLabel = new JLabel(
                 "<html><div style='text-align: center;'>" +
                         "Файл находится на<br><b>вашем Рабочем столе</b>" +
@@ -327,7 +356,6 @@ public class ConsentDialog {
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        // ⭐ Только одна кнопка "Закрыть" по центру
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));
         buttonPanel.setOpaque(false);
 
