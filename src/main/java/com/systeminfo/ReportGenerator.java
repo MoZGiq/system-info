@@ -45,7 +45,6 @@ public class ReportGenerator {
     private static String generateSummary(Map<String, Map<String, String>> data) {
         StringBuilder summary = new StringBuilder();
 
-        // ОС
         Map<String, String> os = data.get("Операционная система");
         if (os != null) {
             String osName = os.getOrDefault("Название ОС", "Неизвестно");
@@ -59,7 +58,6 @@ public class ReportGenerator {
             summary.append("</div></div>");
         }
 
-        // CPU
         Map<String, String> cpu = data.get("Процессор (CPU)");
         if (cpu != null) {
             String cpuName = cpu.getOrDefault("Название", "Неизвестно");
@@ -79,7 +77,6 @@ public class ReportGenerator {
             summary.append("</div></div>");
         }
 
-        // Температура CPU
         Map<String, String> sensors = data.get("Датчики (температура)");
         if (sensors != null && sensors.containsKey("Температура CPU")) {
             String temp = sensors.get("Температура CPU");
@@ -97,7 +94,6 @@ public class ReportGenerator {
             }
         }
 
-        // RAM
         Map<String, String> ram = data.get("Оперативная память (RAM)");
         if (ram != null) {
             String total = ram.getOrDefault("Всего", "?");
@@ -113,7 +109,6 @@ public class ReportGenerator {
             summary.append("</div></div>");
         }
 
-        // GPU
         Map<String, String> gpu = data.get("Видеокарта (GPU)");
         if (gpu != null) {
             String gpuName = gpu.getOrDefault("Название", gpu.getOrDefault("GPU #1 Название", "Неизвестно"));
@@ -127,11 +122,9 @@ public class ReportGenerator {
             summary.append("</div></div>");
         }
 
-        // Диски
         Map<String, String> disks = data.get("Диски и хранилища");
         if (disks != null) {
             int diskCount = 0;
-            long totalSize = 0;
             StringBuilder diskNames = new StringBuilder();
             for (Map.Entry<String, String> entry : disks.entrySet()) {
                 if (entry.getKey().contains("модель")) {
@@ -150,7 +143,6 @@ public class ReportGenerator {
             }
         }
 
-        // Аккумулятор
         Map<String, String> battery = data.get("Аккумулятор");
         if (battery != null && !battery.containsKey("Аккумулятор")) {
             String charge = battery.getOrDefault("Текущий заряд", "?");
@@ -166,7 +158,6 @@ public class ReportGenerator {
             summary.append("</div></div>");
         }
 
-        // Материнская плата
         Map<String, String> mb = data.get("Материнская плата");
         if (mb != null) {
             String manufacturer = mb.getOrDefault("Плата производитель", "Неизвестно");
@@ -179,7 +170,6 @@ public class ReportGenerator {
             summary.append("</div></div>");
         }
 
-        // Антивирус
         Map<String, String> security = data.get("Безопасность (антивирус и брандмауэр)");
         if (security != null) {
             String antivirus = security.getOrDefault("🛡 Антивирус", "");
@@ -211,57 +201,99 @@ public class ReportGenerator {
                   <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     
+                    html {
+                      min-height: 100%;
+                      background: #0c0c1d;
+                    }
+                    
                     html, body {
                       font-family: 'Segoe UI', 'Inter', Tahoma, sans-serif;
                       color: #e0e0e0;
-                      background: #0f0f23;
                     }
                     
+                    /* ⭐ КРАСИВЫЙ АНИМИРОВАННЫЙ ФОН */
                     body {
                       min-height: 100vh;
-                      background: radial-gradient(ellipse at top, #1a1a3e 0%, #0f0f23 50%, #0a0a1a 100%);
+                      background: linear-gradient(-45deg, #0c0c1d, #1a1a3e, #2d1b69, #1e3a5f, #0c0c1d);
+                      background-size: 400% 400%;
+                      background-attachment: fixed;
+                      animation: gradientShift 30s ease infinite;
                       padding: 30px;
                     }
                     
-                    .container { max-width: 900px; margin: 0 auto; }
-                    
-                    /* ⭐ КНОПКА ПЕЧАТИ/PDF */
-                    .actions-bar {
-                      position: sticky;
-                      top: 10px;
-                      z-index: 100;
-                      display: flex;
-                      justify-content: flex-end;
-                      gap: 10px;
-                      margin-bottom: 20px;
+                    @keyframes gradientShift {
+                      0% { background-position: 0% 50%; }
+                      50% { background-position: 100% 50%; }
+                      100% { background-position: 0% 50%; }
                     }
                     
+                    /* ⭐ СТАТИЧНЫЕ ЗВЁЗДЫ */
+                    body::before {
+                      content: '';
+                      position: fixed;
+                      top: 0; left: 0;
+                      width: 100%; height: 100%;
+                      background-image: 
+                        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.6), transparent),
+                        radial-gradient(2px 2px at 60px 70px, rgba(255,255,255,0.4), transparent),
+                        radial-gradient(1px 1px at 50px 50px, rgba(255,255,255,0.7), transparent),
+                        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.5), transparent),
+                        radial-gradient(2px 2px at 90px 10px, rgba(255,255,255,0.6), transparent),
+                        radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.4), transparent),
+                        radial-gradient(2px 2px at 200px 200px, rgba(255,255,255,0.5), transparent),
+                        radial-gradient(1px 1px at 300px 100px, rgba(255,255,255,0.6), transparent);
+                      background-repeat: repeat;
+                      background-size: 300px 300px;
+                      pointer-events: none;
+                      z-index: 0;
+                    }
+                    
+                    .container { 
+                      max-width: 900px; 
+                      margin: 0 auto; 
+                      position: relative;
+                      z-index: 1;
+                    }
+                    
+                    /* ⭐ ФИКСИРОВАННАЯ КНОПКА ПЕЧАТИ */
+                    .actions-bar {
+                      position: fixed;
+                      top: 20px;
+                      right: 20px;
+                      z-index: 9999;
+                      display: flex;
+                      justify-content: flex-end;
+                    }
+                
                     .action-btn {
                       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
                       color: white;
                       border: none;
-                      padding: 12px 24px;
-                      border-radius: 10px;
+                      padding: 14px 28px;
+                      border-radius: 12px;
                       font-size: 14px;
                       font-weight: 600;
                       cursor: pointer;
-                      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+                      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5),
+                                  0 2px 8px rgba(0, 0, 0, 0.3);
                       transition: transform 0.2s, box-shadow 0.2s;
                       font-family: inherit;
+                      backdrop-filter: blur(10px);
+                    }
+                
+                    .action-btn:hover {
+                      transform: translateY(-2px) scale(1.03);
+                      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.7),
+                                  0 4px 12px rgba(0, 0, 0, 0.4);
+                    }
+                
+                    .action-btn:active {
+                      transform: translateY(0) scale(0.98);
                     }
                     
                     .action-btn:hover {
                       transform: translateY(-2px);
                       box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
-                    }
-                    
-                    .action-btn.secondary {
-                      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-                    }
-                    
-                    .action-btn.secondary:hover {
-                      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
                     }
                     
                     /* ЗАГОЛОВОК */
@@ -440,19 +472,15 @@ public class ReportGenerator {
                         color: #000 !important; 
                         padding: 0;
                         margin: 0;
+                        animation: none !important;
                       }
                       
-                      body {
-                        padding: 15px;
-                      }
+                      body { padding: 15px; }
+                      body::before { display: none !important; }
                       
-                      .container {
-                        max-width: 100%;
-                      }
+                      .container { max-width: 100%; }
                       
-                      .actions-bar {
-                        display: none !important;
-                      }
+                      .actions-bar { display: none !important; }
                       
                       .header { 
                         background: #f5f5f5 !important;
@@ -476,9 +504,7 @@ public class ReportGenerator {
                         page-break-after: avoid;
                       }
                       
-                      .summary-title {
-                        color: #1e1e42 !important;
-                      }
+                      .summary-title { color: #1e1e42 !important; }
                       
                       .summary-item {
                         background: white !important;
@@ -486,17 +512,9 @@ public class ReportGenerator {
                         page-break-inside: avoid;
                       }
                       
-                      .summary-label {
-                        color: #555 !important;
-                      }
-                      
-                      .summary-value {
-                        color: #1e1e42 !important;
-                      }
-                      
-                      .summary-sub {
-                        color: #444 !important;
-                      }
+                      .summary-label { color: #555 !important; }
+                      .summary-value { color: #1e1e42 !important; }
+                      .summary-sub { color: #444 !important; }
                       
                       .section { 
                         border: 1px solid #ccc !important; 
@@ -511,21 +529,12 @@ public class ReportGenerator {
                         border-bottom: 1px solid #ccc !important;
                       }
                       
-                      .section-header h2 { 
-                        color: #4c1d95 !important; 
-                      }
+                      .section-header h2 { color: #4c1d95 !important; }
                       
-                      td:first-child { 
-                        color: #555 !important; 
-                      }
+                      td:first-child { color: #555 !important; }
+                      td:last-child { color: #000 !important; }
                       
-                      td:last-child { 
-                        color: #000 !important; 
-                      }
-                      
-                      tr {
-                        page-break-inside: avoid;
-                      }
+                      tr { page-break-inside: avoid; }
                       
                       .footer {
                         background: #f5f5f5 !important;
@@ -535,32 +544,28 @@ public class ReportGenerator {
                       }
                     }
                     
-                    @media (max-width: 768px) {
-                      body { padding: 15px; }
-                      .header h1 { font-size: 22px; }
-                      td { padding: 10px 15px; font-size: 12px; }
-                      .summary-grid { grid-template-columns: 1fr; }
-                      .actions-bar { 
-                        position: relative;
-                        top: 0;
-                        flex-direction: column;
-                      }
-                      .action-btn {
-                        width: 100%;
-                      }
-                    }
+                @media (max-width: 768px) {
+                  body { padding: 15px; }
+                  .header h1 { font-size: 22px; }
+                  td { padding: 10px 15px; font-size: 12px; }
+                  .summary-grid { grid-template-columns: 1fr; }
+                  .actions-bar {\s
+                    top: 10px;
+                    right: 10px;
+                  }
+                  .action-btn {\s
+                    padding: 10px 20px;
+                    font-size: 13px;
+                  }
+                }
                   </style>
                 </head>
                 <body>
                   <div class="container">
                     
-                    <!-- ⭐ КНОПКИ ДЕЙСТВИЙ -->
                     <div class="actions-bar">
                       <button class="action-btn" onclick="window.print()">
                         🖨 Печать / Сохранить PDF
-                      </button>
-                      <button class="action-btn secondary" onclick="copyReport()">
-                        📋 Копировать данные
                       </button>
                     </div>
                     
@@ -572,7 +577,7 @@ public class ReportGenerator {
         html.append("      <p class=\"date\">📅 ").append(date).append("</p>\n");
         html.append("    </div>\n\n");
 
-        // ⭐ КРАТКАЯ СВОДКА
+        // Краткая сводка
         html.append("""
                     <div class="summary-section">
                       <div class="summary-title">
@@ -612,44 +617,7 @@ public class ReportGenerator {
         html.append("      <p>Сделано с <span class=\"footer-heart\">♥</span> для удобной диагностики ПК</p>\n");
         html.append("    </div>\n");
         html.append("  </div>\n");
-
-        // ⭐ JavaScript для копирования
-        html.append("""
-                  <script>
-                    function copyReport() {
-                      const sections = document.querySelectorAll('.section');
-                      let text = '═══════════════════════════════════════════\\n';
-                      text += '   ОТЧЁТ О ХАРАКТЕРИСТИКАХ КОМПЬЮТЕРА\\n';
-                      text += '═══════════════════════════════════════════\\n\\n';
-                      
-                      sections.forEach(section => {
-                        const title = section.querySelector('h2').innerText;
-                        text += '── ' + title + ' ──\\n';
-                        const rows = section.querySelectorAll('tr');
-                        rows.forEach(row => {
-                          const cells = row.querySelectorAll('td');
-                          if (cells.length === 2) {
-                            text += '  ' + cells[0].innerText.padEnd(32) + cells[1].innerText + '\\n';
-                          }
-                        });
-                        text += '\\n';
-                      });
-                      
-                      navigator.clipboard.writeText(text).then(() => {
-                        const btn = event.target;
-                        const original = btn.innerHTML;
-                        btn.innerHTML = '✅ Скопировано!';
-                        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                        setTimeout(() => {
-                          btn.innerHTML = original;
-                        }, 2000);
-                      }).catch(err => {
-                        alert('Не удалось скопировать: ' + err);
-                      });
-                    }
-                  </script>
-                </body>
-                </html>""");
+        html.append("</body>\n</html>");
 
         try (FileWriter writer = new FileWriter(filePath, StandardCharsets.UTF_8)) {
             writer.write(html.toString());
