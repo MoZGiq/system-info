@@ -76,7 +76,6 @@ public class ReportGenerator {
                   <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     
-                    /* ⭐ ИСПРАВЛЕНИЕ ФОНА ПРИ СКРОЛЛЕ */
                     html {
                       min-height: 100%;
                       background: #0c0c1d;
@@ -85,18 +84,17 @@ public class ReportGenerator {
                     html, body {
                       font-family: 'Segoe UI', 'Inter', Tahoma, sans-serif;
                       color: #e0e0e0;
-                      overflow-x: hidden;
                     }
                     
-                    /* ⭐ АНИМИРОВАННЫЙ ФИКСИРОВАННЫЙ ФОН */
+                    /* ⭐ ОПТИМИЗИРОВАННЫЙ ФОН */
                     body {
                       min-height: 100vh;
                       background: linear-gradient(-45deg, #0c0c1d, #1a1a3e, #2d1b69, #1e3a5f, #0c0c1d);
                       background-size: 400% 400%;
                       background-attachment: fixed;
-                      animation: gradientShift 15s ease infinite;
-                      position: relative;
+                      animation: gradientShift 30s ease infinite;
                       padding: 30px;
+                      will-change: background-position;
                     }
                     
                     @keyframes gradientShift {
@@ -105,50 +103,25 @@ public class ReportGenerator {
                       100% { background-position: 0% 50%; }
                     }
                     
-                    /* ⭐ ЗВЁЗДЫ — ФИКСИРОВАННЫЕ */
+                    /* ⭐ СТАТИЧНЫЕ ЗВЁЗДЫ (без анимации движения) */
                     body::before {
                       content: '';
                       position: fixed;
                       top: 0; left: 0;
                       width: 100%; height: 100%;
                       background-image: 
-                        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.5), transparent),
-                        radial-gradient(2px 2px at 60px 70px, rgba(255,255,255,0.3), transparent),
-                        radial-gradient(1px 1px at 50px 50px, rgba(255,255,255,0.6), transparent),
-                        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.4), transparent),
-                        radial-gradient(2px 2px at 90px 10px, rgba(255,255,255,0.5), transparent),
-                        radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.3), transparent);
+                        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.6), transparent),
+                        radial-gradient(2px 2px at 60px 70px, rgba(255,255,255,0.4), transparent),
+                        radial-gradient(1px 1px at 50px 50px, rgba(255,255,255,0.7), transparent),
+                        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.5), transparent),
+                        radial-gradient(2px 2px at 90px 10px, rgba(255,255,255,0.6), transparent),
+                        radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.4), transparent),
+                        radial-gradient(2px 2px at 200px 200px, rgba(255,255,255,0.5), transparent),
+                        radial-gradient(1px 1px at 300px 100px, rgba(255,255,255,0.6), transparent);
                       background-repeat: repeat;
-                      background-size: 200px 200px;
-                      animation: starsMove 50s linear infinite;
+                      background-size: 300px 300px;
                       pointer-events: none;
                       z-index: 0;
-                    }
-                    
-                    @keyframes starsMove {
-                      from { background-position: 0 0; }
-                      to { background-position: 200px 200px; }
-                    }
-                    
-                    /* ⭐ ПЛАВАЮЩИЕ ЧАСТИЦЫ — ФИКСИРОВАННЫЕ */
-                    body::after {
-                      content: '';
-                      position: fixed;
-                      top: 0; left: 0;
-                      width: 100%; height: 100%;
-                      background-image:
-                        radial-gradient(circle at 20% 50%, rgba(120, 100, 255, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 100, 200, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 20%, rgba(100, 200, 255, 0.1) 0%, transparent 50%);
-                      animation: floatBubbles 20s ease-in-out infinite;
-                      pointer-events: none;
-                      z-index: 0;
-                    }
-                    
-                    @keyframes floatBubbles {
-                      0%, 100% { transform: translate(0, 0) scale(1); }
-                      33% { transform: translate(30px, -30px) scale(1.1); }
-                      66% { transform: translate(-20px, 20px) scale(0.95); }
                     }
                     
                     .container { 
@@ -158,146 +131,58 @@ public class ReportGenerator {
                       z-index: 1;
                     }
                     
+                    /* ⭐ ОБЛЕГЧЁННЫЙ ЗАГОЛОВОК */
                     .header {
                       text-align: center;
                       padding: 40px 20px;
-                      background: linear-gradient(135deg, rgba(30, 58, 95, 0.85) 0%, rgba(45, 27, 105, 0.85) 100%);
+                      background: linear-gradient(135deg, rgba(30, 58, 95, 0.9) 0%, rgba(45, 27, 105, 0.9) 100%);
                       border-radius: 20px;
                       margin-bottom: 30px;
-                      box-shadow: 
-                        0 10px 40px rgba(0,0,0,0.4),
-                        0 0 80px rgba(139, 92, 246, 0.15);
-                      position: relative;
-                      overflow: hidden;
-                      backdrop-filter: blur(10px);
-                      border: 1px solid rgba(139, 92, 246, 0.2);
-                    }
-                    
-                    .header::before {
-                      content: '';
-                      position: absolute;
-                      top: -50%; left: -50%;
-                      width: 200%; height: 200%;
-                      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-                      animation: rotate 20s linear infinite;
-                    }
-                    
-                    .header::after {
-                      content: '';
-                      position: absolute;
-                      top: 0; left: -100%;
-                      width: 100%; height: 100%;
-                      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-                      animation: shine 4s ease-in-out infinite;
-                    }
-                    
-                    @keyframes rotate { 
-                      to { transform: rotate(360deg); } 
-                    }
-                    
-                    @keyframes shine {
-                      0% { left: -100%; }
-                      50%, 100% { left: 100%; }
+                      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                      border: 1px solid rgba(139, 92, 246, 0.3);
                     }
                     
                     .header h1 {
                       font-size: 32px;
                       font-weight: 700;
                       color: #fff;
-                      position: relative;
-                      z-index: 1;
-                      text-shadow: 
-                        0 2px 10px rgba(0,0,0,0.3),
-                        0 0 30px rgba(139, 92, 246, 0.5);
-                      animation: titlePulse 3s ease-in-out infinite;
-                    }
-                    
-                    @keyframes titlePulse {
-                      0%, 100% { text-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 0 30px rgba(139, 92, 246, 0.5); }
-                      50% { text-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 0 50px rgba(139, 92, 246, 0.9); }
+                      text-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 0 30px rgba(139, 92, 246, 0.5);
                     }
                     
                     .header .subtitle {
                       color: #a0b4cc;
                       font-size: 14px;
                       margin-top: 8px;
-                      position: relative;
-                      z-index: 1;
                     }
                     
                     .header .date {
                       color: #7ecfff;
                       font-size: 13px;
                       margin-top: 12px;
-                      position: relative;
-                      z-index: 1;
                     }
                     
+                    /* ⭐ ОБЛЕГЧЁННЫЕ СЕКЦИИ (без backdrop-filter) */
                     .section {
-                      background: rgba(255,255,255,0.06);
-                      backdrop-filter: blur(15px);
-                      border: 1px solid rgba(139, 92, 246, 0.15);
+                      background: rgba(20, 20, 45, 0.85);
+                      border: 1px solid rgba(139, 92, 246, 0.2);
                       border-radius: 16px;
                       margin-bottom: 20px;
                       overflow: hidden;
-                      box-shadow: 
-                        0 4px 20px rgba(0,0,0,0.3),
-                        0 0 40px rgba(139, 92, 246, 0.05);
-                      transition: all 0.3s ease;
-                      animation: fadeInUp 0.6s ease-out backwards;
-                    }
-                    
-                    .section:nth-child(1) { animation-delay: 0.1s; }
-                    .section:nth-child(2) { animation-delay: 0.2s; }
-                    .section:nth-child(3) { animation-delay: 0.3s; }
-                    .section:nth-child(4) { animation-delay: 0.4s; }
-                    .section:nth-child(5) { animation-delay: 0.5s; }
-                    .section:nth-child(6) { animation-delay: 0.6s; }
-                    .section:nth-child(7) { animation-delay: 0.7s; }
-                    .section:nth-child(8) { animation-delay: 0.8s; }
-                    .section:nth-child(9) { animation-delay: 0.9s; }
-                    
-                    @keyframes fadeInUp {
-                      from {
-                        opacity: 0;
-                        transform: translateY(20px);
-                      }
-                      to {
-                        opacity: 1;
-                        transform: translateY(0);
-                      }
+                      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                      transition: transform 0.2s ease, border-color 0.2s ease;
                     }
                     
                     .section:hover {
-                      transform: translateY(-3px);
-                      box-shadow: 
-                        0 10px 40px rgba(0,0,0,0.4),
-                        0 0 60px rgba(139, 92, 246, 0.2);
-                      border-color: rgba(139, 92, 246, 0.4);
+                      transform: translateY(-2px);
+                      border-color: rgba(139, 92, 246, 0.5);
                     }
                     
                     .section-header {
                       background: linear-gradient(90deg, 
-                        rgba(99,102,241,0.25) 0%, 
-                        rgba(139,92,246,0.15) 50%,
-                        rgba(99,102,241,0.05) 100%);
+                        rgba(99,102,241,0.3) 0%, 
+                        rgba(139,92,246,0.15) 100%);
                       padding: 16px 24px;
                       border-bottom: 1px solid rgba(255,255,255,0.06);
-                      position: relative;
-                      overflow: hidden;
-                    }
-                    
-                    .section-header::before {
-                      content: '';
-                      position: absolute;
-                      top: 0; left: -100%;
-                      width: 100%; height: 100%;
-                      background: linear-gradient(90deg, transparent, rgba(139,92,246,0.1), transparent);
-                      transition: left 0.6s ease;
-                    }
-                    
-                    .section:hover .section-header::before {
-                      left: 100%;
                     }
                     
                     .section-header h2 {
@@ -305,18 +190,14 @@ public class ReportGenerator {
                       font-weight: 600;
                       color: #c4b5fd;
                       letter-spacing: 0.5px;
-                      position: relative;
-                      z-index: 1;
-                      text-shadow: 0 0 20px rgba(196, 181, 253, 0.3);
                     }
                     
                     table { width: 100%; border-collapse: collapse; }
                     
-                    tr { transition: all 0.2s ease; }
+                    tr { transition: background 0.15s ease; }
                     
                     tr:hover { 
-                      background: rgba(139, 92, 246, 0.08);
-                      transform: translateX(3px);
+                      background: rgba(139, 92, 246, 0.1);
                     }
                     
                     td {
@@ -338,6 +219,7 @@ public class ReportGenerator {
                       font-family: 'Consolas', 'Courier New', monospace;
                     }
                     
+                    /* ⭐ ФУТЕР */
                     .footer {
                       text-align: center;
                       color: #6b7280;
@@ -345,9 +227,8 @@ public class ReportGenerator {
                       padding: 25px;
                       font-size: 12px;
                       border-top: 1px solid rgba(255,255,255,0.05);
-                      background: rgba(0,0,0,0.2);
+                      background: rgba(0,0,0,0.3);
                       border-radius: 16px;
-                      backdrop-filter: blur(10px);
                       position: relative;
                       z-index: 1;
                     }
@@ -358,8 +239,8 @@ public class ReportGenerator {
                     
                     .footer-heart {
                       display: inline-block;
-                      animation: heartbeat 1.5s ease-in-out infinite;
                       color: #ef4444;
+                      animation: heartbeat 1.5s ease-in-out infinite;
                     }
                     
                     @keyframes heartbeat {
@@ -367,6 +248,7 @@ public class ReportGenerator {
                       50% { transform: scale(1.2); }
                     }
                     
+                    /* ⭐ СКРОЛЛБАР */
                     ::-webkit-scrollbar {
                       width: 12px;
                     }
@@ -384,6 +266,7 @@ public class ReportGenerator {
                       background: linear-gradient(180deg, #818cf8, #a78bfa);
                     }
                     
+                    /* ⭐ ПЕЧАТЬ */
                     @media print {
                       html, body { 
                         background: white !important; 
@@ -391,27 +274,36 @@ public class ReportGenerator {
                         padding: 10px; 
                         animation: none !important;
                       }
-                      body::before, body::after { display: none; }
+                      body::before { display: none; }
                       .section { 
                         border: 1px solid #ddd; 
                         box-shadow: none; 
                         background: white !important;
-                        animation: none !important;
                       }
                       .header { 
                         background: #f0f0f0 !important; 
                         animation: none !important;
                       }
-                      .header h1 { color: #333 !important; animation: none !important; }
+                      .header h1 { color: #333 !important; }
                       .section-header h2 { color: #4c1d95 !important; }
                       td:first-child { color: #666 !important; }
                       td:last-child { color: #333 !important; }
                     }
                     
+                    /* ⭐ МОБИЛЬНАЯ ВЕРСИЯ */
                     @media (max-width: 768px) {
                       body { padding: 15px; }
                       .header h1 { font-size: 22px; }
                       td { padding: 10px 15px; font-size: 12px; }
+                    }
+                    
+                    /* ⭐ ОТКЛЮЧЕНИЕ АНИМАЦИЙ ДЛЯ СЛАБЫХ ПК */
+                    @media (prefers-reduced-motion: reduce) {
+                      *, *::before, *::after {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                        transition-duration: 0.01ms !important;
+                      }
                     }
                   </style>
                 </head>
