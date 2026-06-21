@@ -141,12 +141,12 @@ public class WelcomeDialog {
         continueButton.setPreferredSize(new Dimension(200, 42));
         continueButton.setEnabled(false);
         continueButton.addActionListener(e -> {
-            // ✅ Сохраняем согласие пользователя
             UserPreferences prefs = new UserPreferences();
             prefs.setAgreedToTerms();
 
             frame.dispose();
-            new ConsentDialog().showConsentDialog();
+            // После согласия → выбор типа устройства
+            new DeviceTypeDialog().show();
         });
 
         // ✅ Кнопка "Выйти" с ЧЁРНЫМ текстом

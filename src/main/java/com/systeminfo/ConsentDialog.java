@@ -11,32 +11,52 @@ public class ConsentDialog {
 
     private final JCheckBox cbOS = new JCheckBox("Операционная система", true);
     private final JCheckBox cbCPU = new JCheckBox("Процессор (CPU)", true);
+    private final JCheckBox cbSensors = new JCheckBox("Датчики (температура CPU)", true);
     private final JCheckBox cbRAM = new JCheckBox("Оперативная память (RAM)", true);
     private final JCheckBox cbGPU = new JCheckBox("Видеокарта (GPU)", true);
     private final JCheckBox cbDisks = new JCheckBox("Диски и хранилища", true);
     private final JCheckBox cbNetwork = new JCheckBox("Сетевые интерфейсы", true);
+    private final JCheckBox cbConnections = new JCheckBox("Активные сетевые соединения", true);
     private final JCheckBox cbMotherboard = new JCheckBox("Материнская плата", true);
     private final JCheckBox cbDisplay = new JCheckBox("Дисплей", true);
+    private final JCheckBox cbBattery = new JCheckBox("Аккумулятор", true);
+    private final JCheckBox cbSecurity = new JCheckBox("Безопасность (антивирус и брандмауэр)", true);
     private final JCheckBox cbJava = new JCheckBox("Среда Java", true);
 
     public void showConsentDialog() {
         JFrame frame = new JFrame("Сбор информации о системе");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(680, 700);
+        frame.setSize(680, 820);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
+
+        // ⭐ Проверяем тип устройства
+        UserPreferences prefs = new UserPreferences();
+        boolean isLaptop = prefs.isLaptop();
+
+        // Для ПК скрываем/отключаем аккумулятор
+        if (!isLaptop) {
+            cbBattery.setSelected(false);
+            cbBattery.setEnabled(false);
+            cbBattery.setText("Аккумулятор (только для ноутбуков)");
+            cbBattery.setForeground(Color.GRAY);
+        }
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
         // ===== Верхняя панель =====
         JPanel headerPanel = new JPanel(new BorderLayout(5, 5));
-        JLabel titleLabel = new JLabel("🖥  Сбор характеристик компьютера");
+
+        String deviceIcon = isLaptop ? "💻" : "🖥";
+        String deviceText = isLaptop ? "ноутбук" : "стационарный ПК";
+
+        JLabel titleLabel = new JLabel(deviceIcon + "  Сбор характеристик компьютера");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         headerPanel.add(titleLabel, BorderLayout.NORTH);
 
         JTextArea descriptionArea = new JTextArea(
-                "Данное приложение собирает технические характеристики вашего компьютера.\n\n" +
+                "Данное приложение собирает технические характеристики вашего " + deviceText + ".\n\n" +
                         "📌 Отчёт сохраняется в формате HTML на ваш Рабочий стол.\n" +
                         "📌 Данные сохраняются ТОЛЬКО локально на вашем компьютере.\n" +
                         "📌 Без вашего согласия ничего не будет собрано."
@@ -50,7 +70,6 @@ public class ConsentDialog {
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // ===== Центральная панель =====
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
@@ -61,7 +80,12 @@ public class ConsentDialog {
                 TitledBorder.LEFT, TitledBorder.TOP,
                 new Font("SansSerif", Font.BOLD, 13)));
 
-        JCheckBox[] categoryBoxes = {cbOS, cbCPU, cbRAM, cbGPU, cbDisks, cbNetwork, cbMotherboard, cbDisplay, cbJava};
+        JCheckBox[] categoryBoxes = {
+                cbOS, cbCPU, cbSensors, cbRAM, cbGPU, cbDisks,
+                cbNetwork, cbConnections, cbMotherboard, cbDisplay,
+                cbBattery, cbSecurity, cbJava
+        };
+
         for (JCheckBox cb : categoryBoxes) {
             cb.setFont(new Font("SansSerif", Font.PLAIN, 13));
             cb.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -76,7 +100,11 @@ public class ConsentDialog {
         JButton deselectAll = new JButton("Снять все");
         selectAll.setFont(new Font("SansSerif", Font.PLAIN, 11));
         deselectAll.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        selectAll.addActionListener(e -> { for (JCheckBox cb : categoryBoxes) cb.setSelected(true); });
+        selectAll.addActionListener(e -> {
+            for (JCheckBox cb : categoryBoxes) {
+                if (cb.isEnabled()) cb.setSelected(true);
+            }
+        });
         deselectAll.addActionListener(e -> { for (JCheckBox cb : categoryBoxes) cb.setSelected(false); });
         selectButtonsPanel.add(selectAll);
         selectButtonsPanel.add(deselectAll);
@@ -112,11 +140,9 @@ public class ConsentDialog {
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         mainPanel.add(scroll, BorderLayout.CENTER);
 
-        // ===== НИЖНЯЯ ПАНЕЛЬ С КНОПКАМИ =====
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
 
-        // Основные кнопки (Согласен / Отказаться)
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
         JButton agreeButton = createStyledButton(
@@ -159,28 +185,41 @@ public class ConsentDialog {
         buttonPanel.add(agreeButton);
         buttonPanel.add(declineButton);
 
-        // ⭐ Панель с кнопкой "Прочитать гарантии заново"
-        JPanel termsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));
-        termsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
+        // Дополнительные кнопки
+        JPanel extraButtonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        extraButtonsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
         JButton showTermsBtn = createStyledButton(
-                "🔒 Прочитать гарантии конфиденциальности",
+                "🔒 Прочитать гарантии",
                 new Color(33, 150, 243),
                 new Color(13, 71, 161)
         );
-        showTermsBtn.setPreferredSize(new Dimension(360, 38));
-        showTermsBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
+        showTermsBtn.setPreferredSize(new Dimension(200, 36));
+        showTermsBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         showTermsBtn.addActionListener(e -> {
             frame.dispose();
             new WelcomeDialog().show();
         });
 
-        termsPanel.add(showTermsBtn);
+        JButton changeDeviceBtn = createStyledButton(
+                "🔄 Изменить тип устройства",
+                new Color(255, 152, 0),
+                new Color(230, 81, 0)
+        );
+        changeDeviceBtn.setPreferredSize(new Dimension(230, 36));
+        changeDeviceBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        // Добавляем обе панели снизу
+        changeDeviceBtn.addActionListener(e -> {
+            frame.dispose();
+            new DeviceTypeDialog().show();
+        });
+
+        extraButtonsPanel.add(showTermsBtn);
+        extraButtonsPanel.add(changeDeviceBtn);
+
         southPanel.add(buttonPanel);
-        southPanel.add(termsPanel);
+        southPanel.add(extraButtonsPanel);
 
         mainPanel.add(southPanel, BorderLayout.SOUTH);
 
@@ -188,9 +227,6 @@ public class ConsentDialog {
         frame.setVisible(true);
     }
 
-    /**
-     * Создаёт стилизованную кнопку с ЧЁРНЫМ текстом и цветной рамкой.
-     */
     private JButton createStyledButton(String text, Color bgColor, Color borderColor) {
         JButton button = new JButton(text);
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -225,9 +261,11 @@ public class ConsentDialog {
     }
 
     private String buildReportPath() {
+        UserPreferences prefs = new UserPreferences();
+        String deviceType = prefs.isLaptop() ? "laptop" : "desktop";
         String timestamp = java.time.LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-        return getDesktopPath() + File.separator + "system_report_" + timestamp + ".html";
+        return getDesktopPath() + File.separator + "system_report_" + deviceType + "_" + timestamp + ".html";
     }
 
     private void collectAndSave() {
@@ -255,7 +293,9 @@ public class ConsentDialog {
                 return collector.collect(
                         cbOS.isSelected(), cbCPU.isSelected(), cbRAM.isSelected(),
                         cbGPU.isSelected(), cbDisks.isSelected(), cbNetwork.isSelected(),
-                        cbMotherboard.isSelected(), cbDisplay.isSelected(), cbJava.isSelected()
+                        cbMotherboard.isSelected(), cbDisplay.isSelected(), cbJava.isSelected(),
+                        cbBattery.isSelected(), cbSensors.isSelected(),
+                        cbConnections.isSelected(), cbSecurity.isSelected()
                 );
             }
 

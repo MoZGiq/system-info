@@ -16,8 +16,13 @@ public class UserPreferences {
     private static final String KEY_AGREED = "user.agreed";
     private static final String KEY_AGREED_DATE = "user.agreed.date";
     private static final String KEY_AGREED_VERSION = "user.agreed.version";
+    private static final String KEY_DEVICE_TYPE = "user.device.type";
 
     private static final String CURRENT_VERSION = "1.0";
+
+    // Типы устройств
+    public static final String DEVICE_DESKTOP = "desktop";
+    public static final String DEVICE_LAPTOP = "laptop";
 
     private final Path configPath;
     private final Properties properties;
@@ -72,5 +77,30 @@ public class UserPreferences {
 
     public String getAgreementDate() {
         return properties.getProperty(KEY_AGREED_DATE, "неизвестно");
+    }
+
+    /**
+     * Тип устройства (desktop / laptop).
+     */
+    public String getDeviceType() {
+        return properties.getProperty(KEY_DEVICE_TYPE, "");
+    }
+
+    public void setDeviceType(String deviceType) {
+        properties.setProperty(KEY_DEVICE_TYPE, deviceType);
+        save();
+    }
+
+    public boolean hasDeviceType() {
+        String type = getDeviceType();
+        return DEVICE_DESKTOP.equals(type) || DEVICE_LAPTOP.equals(type);
+    }
+
+    public boolean isLaptop() {
+        return DEVICE_LAPTOP.equals(getDeviceType());
+    }
+
+    public boolean isDesktop() {
+        return DEVICE_DESKTOP.equals(getDeviceType());
     }
 }

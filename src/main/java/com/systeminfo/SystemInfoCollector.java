@@ -2,8 +2,10 @@ package com.systeminfo;
 
 import oshi.SystemInfo;
 import oshi.hardware.*;
+import oshi.software.os.InternetProtocolStats;
 import oshi.software.os.OperatingSystem;
 
+import java.time.LocalDate;
 import java.util.*;
 
 public class SystemInfoCollector {
@@ -15,21 +17,38 @@ public class SystemInfoCollector {
     public Map<String, Map<String, String>> collect(
             boolean collectOS, boolean collectCPU, boolean collectRAM,
             boolean collectGPU, boolean collectDisks, boolean collectNetwork,
-            boolean collectMotherboard, boolean collectDisplay, boolean collectJava
+            boolean collectMotherboard, boolean collectDisplay, boolean collectJava,
+            boolean collectBattery, boolean collectSensors, boolean collectConnections,
+            boolean collectSecurity
     ) {
         Map<String, Map<String, String>> result = new LinkedHashMap<>();
 
         if (collectOS) result.put("Операционная система", getOSInfo());
         if (collectCPU) result.put("Процессор (CPU)", getCPUInfo());
+        if (collectSensors) result.put("Датчики (температура)", getSensorsInfo());
         if (collectRAM) result.put("Оперативная память (RAM)", getRAMInfo());
         if (collectGPU) result.put("Видеокарта (GPU)", getGPUInfo());
         if (collectDisks) result.put("Диски и хранилища", getDiskInfo());
         if (collectNetwork) result.put("Сетевые интерфейсы", getNetworkInfo());
+        if (collectConnections) result.put("Активные сетевые соединения", getActiveConnections());
         if (collectMotherboard) result.put("Материнская плата", getMotherboardInfo());
         if (collectDisplay) result.put("Дисплей", getDisplayInfo());
+        if (collectBattery) result.put("Аккумулятор", getBatteryInfo());
+        if (collectSecurity) result.put("Безопасность (антивирус и брандмауэр)", getSecurityInfo());
         if (collectJava) result.put("Среда Java", getJavaInfo());
 
         return result;
+    }
+
+    // Перегруженный метод для обратной совместимости
+    public Map<String, Map<String, String>> collect(
+            boolean collectOS, boolean collectCPU, boolean collectRAM,
+            boolean collectGPU, boolean collectDisks, boolean collectNetwork,
+            boolean collectMotherboard, boolean collectDisplay, boolean collectJava
+    ) {
+        return collect(collectOS, collectCPU, collectRAM, collectGPU, collectDisks,
+                collectNetwork, collectMotherboard, collectDisplay, collectJava,
+                true, true, true, true);
     }
 
     private Map<String, String> getOSInfo() {
@@ -68,6 +87,57 @@ public class SystemInfoCollector {
             double cpuLoad = cpu.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
             info.put("Текущая загрузка", String.format("%.1f%%", cpuLoad));
         } catch (Exception e) { info.put("Ошибка", e.getMessage()); }
+        return info;
+    }
+
+    // ⭐ НОВЫЙ МЕТОД: Датчики (температура, вентиляторы)
+    private Map<String, String> getSensorsInfo() {
+        Map<String, String> info = new LinkedHashMap<>();
+        try {
+            Sensors sensors = hal.getSensors();
+
+            // Температура CPU
+            double cpuTemp = sensors.getCpuTemperature();
+            if (cpuTemp > 0) {
+                info.put("Температура CPU", String.format("%.1f °C", cpuTemp));
+
+                String status;
+                if (cpuTemp < 50) status = "✅ Нормальная";
+                else if (cpuTemp < 70) status = "⚠ Повышенная";
+                else if (cpuTemp < 85) status = "⚠ Высокая";
+                else status = "🔥 КРИТИЧЕСКАЯ!";
+                info.put("Статус температуры", status);
+            } else {
+                info.put("Температура CPU", "Недоступно (датчик не найден)");
+            }
+
+            // Напряжение CPU
+            double voltage = sensors.getCpuVoltage();
+            if (voltage > 0) {
+                info.put("Напряжение CPU", String.format("%.2f В", voltage));
+            }
+
+            // Скорости вентиляторов
+            int[] fanSpeeds = sensors.getFanSpeeds();
+            if (fanSpeeds != null && fanSpeeds.length > 0) {
+                for (int i = 0; i < fanSpeeds.length; i++) {
+                    if (fanSpeeds[i] > 0) {
+                        info.put("Вентилятор #" + (i + 1), fanSpeeds[i] + " RPM");
+                    }
+                }
+            } else {
+                info.put("Вентиляторы", "Недоступно");
+            }
+
+            if (info.isEmpty()) {
+                info.put("Информация", "Датчики недоступны на данной системе");
+                info.put("Примечание", "Для получения температуры может потребоваться запуск от имени администратора");
+            }
+
+        } catch (Exception e) {
+            info.put("Ошибка", e.getMessage());
+            info.put("Примечание", "Запустите программу от имени администратора для доступа к датчикам");
+        }
         return info;
     }
 
@@ -175,6 +245,84 @@ public class SystemInfoCollector {
         return info;
     }
 
+    // ⭐ НОВЫЙ МЕТОД: Активные сетевые соединения
+    private Map<String, String> getActiveConnections() {
+        Map<String, String> info = new LinkedHashMap<>();
+        try {
+            InternetProtocolStats ipStats = os.getInternetProtocolStats();
+
+            // TCP статистика
+            InternetProtocolStats.TcpStats tcp4 = ipStats.getTCPv4Stats();
+            info.put("📊 TCP v4 — Активных соединений", String.valueOf(tcp4.getConnectionsEstablished()));
+            info.put("📊 TCP v4 — Прослушивающих портов", String.valueOf(tcp4.getConnectionsActive()));
+            info.put("📊 TCP v4 — Сегментов отправлено", String.valueOf(tcp4.getSegmentsSent()));
+            info.put("📊 TCP v4 — Сегментов получено", String.valueOf(tcp4.getSegmentsReceived()));
+            info.put("📊 TCP v4 — Ошибок отправки", String.valueOf(tcp4.getOutResets()));
+
+            InternetProtocolStats.TcpStats tcp6 = ipStats.getTCPv6Stats();
+            info.put("📊 TCP v6 — Активных соединений", String.valueOf(tcp6.getConnectionsEstablished()));
+
+            // UDP статистика
+            InternetProtocolStats.UdpStats udp4 = ipStats.getUDPv4Stats();
+            info.put("📊 UDP v4 — Датаграмм отправлено", String.valueOf(udp4.getDatagramsSent()));
+            info.put("📊 UDP v4 — Датаграмм получено", String.valueOf(udp4.getDatagramsReceived()));
+
+            // Список активных соединений
+            List<InternetProtocolStats.IPConnection> connections = ipStats.getConnections();
+            int established = 0;
+            int listening = 0;
+            int timeWait = 0;
+
+            for (InternetProtocolStats.IPConnection conn : connections) {
+                String state = conn.getState().toString();
+                if (state.contains("ESTABLISHED")) established++;
+                else if (state.contains("LISTEN")) listening++;
+                else if (state.contains("TIME_WAIT")) timeWait++;
+            }
+
+            info.put("🔗 Всего соединений", String.valueOf(connections.size()));
+            info.put("✅ Установленных (ESTABLISHED)", String.valueOf(established));
+            info.put("👂 Прослушивающих (LISTEN)", String.valueOf(listening));
+            info.put("⏳ Ожидающих закрытия (TIME_WAIT)", String.valueOf(timeWait));
+
+            // Показываем первые 15 активных соединений
+            int count = 0;
+            int maxShow = 15;
+            for (InternetProtocolStats.IPConnection conn : connections) {
+                if (!conn.getState().toString().contains("ESTABLISHED")) continue;
+                if (count >= maxShow) break;
+
+                String localAddr = formatAddress(conn.getLocalAddress()) + ":" + conn.getLocalPort();
+                String foreignAddr = formatAddress(conn.getForeignAddress()) + ":" + conn.getForeignPort();
+                info.put("Соединение #" + (count + 1),
+                        localAddr + " → " + foreignAddr + " [" + conn.getType() + "]");
+                count++;
+            }
+
+            if (established > maxShow) {
+                info.put("Примечание", "Показано " + maxShow + " из " + established + " активных соединений");
+            }
+
+        } catch (Exception e) {
+            info.put("Ошибка", e.getMessage());
+        }
+        return info;
+    }
+
+    private String formatAddress(byte[] addr) {
+        if (addr == null || addr.length == 0) return "0.0.0.0";
+        try {
+            if (addr.length == 4) {
+                return String.format("%d.%d.%d.%d",
+                        addr[0] & 0xFF, addr[1] & 0xFF, addr[2] & 0xFF, addr[3] & 0xFF);
+            } else {
+                return java.net.InetAddress.getByAddress(addr).getHostAddress();
+            }
+        } catch (Exception e) {
+            return "?.?.?.?";
+        }
+    }
+
     private Map<String, String> getMotherboardInfo() {
         Map<String, String> info = new LinkedHashMap<>();
         try {
@@ -217,6 +365,289 @@ public class SystemInfoCollector {
             }
         } catch (Exception e) { info.put("Ошибка", e.getMessage()); }
         return info;
+    }
+
+    // ⭐ НОВЫЙ МЕТОД: Аккумулятор
+    private Map<String, String> getBatteryInfo() {
+        Map<String, String> info = new LinkedHashMap<>();
+        try {
+            List<PowerSource> powerSources = hal.getPowerSources();
+
+            if (powerSources.isEmpty()) {
+                info.put("Аккумулятор", "Не обнаружен (стационарный ПК или ноутбук без батареи)");
+                return info;
+            }
+
+            int idx = 1;
+            for (PowerSource ps : powerSources) {
+                String prefix = powerSources.size() > 1 ? "Батарея #" + idx + " " : "";
+
+                info.put(prefix + "Название", ps.getName());
+                info.put(prefix + "Производитель", ps.getManufacturer());
+                info.put(prefix + "Модель", ps.getDeviceName());
+
+                // Заряд
+                double charge = ps.getRemainingCapacityPercent() * 100;
+                info.put(prefix + "Текущий заряд", String.format("%.1f%%", charge));
+
+                // Статус заряда
+                String chargeStatus;
+                if (charge >= 80) chargeStatus = "🔋 Полный";
+                else if (charge >= 50) chargeStatus = "🔋 Средний";
+                else if (charge >= 20) chargeStatus = "🪫 Низкий";
+                else chargeStatus = "⚠ КРИТИЧЕСКИЙ!";
+                info.put(prefix + "Статус заряда", chargeStatus);
+
+                // Состояние
+                if (ps.isCharging()) {
+                    info.put(prefix + "Состояние", "⚡ Заряжается");
+                } else if (ps.isDischarging()) {
+                    info.put(prefix + "Состояние", "🔌 Разряжается (от батареи)");
+                } else if (ps.isPowerOnLine()) {
+                    info.put(prefix + "Состояние", "🔌 Питание от сети");
+                } else {
+                    info.put(prefix + "Состояние", "❓ Неизвестно");
+                }
+
+                // Время работы
+                double timeRemaining = ps.getTimeRemainingEstimated();
+                if (timeRemaining > 0) {
+                    int hours = (int) (timeRemaining / 3600);
+                    int minutes = (int) ((timeRemaining % 3600) / 60);
+                    info.put(prefix + "Осталось времени", hours + " ч. " + minutes + " мин.");
+                } else if (timeRemaining == -1.0) {
+                    info.put(prefix + "Осталось времени", "Рассчитывается...");
+                } else if (timeRemaining == -2.0) {
+                    info.put(prefix + "Осталось времени", "Заряжается от сети");
+                }
+
+                // Ёмкость
+                double maxCapacity = ps.getMaxCapacity();
+                double designCapacity = ps.getDesignCapacity();
+                if (maxCapacity > 0) {
+                    info.put(prefix + "Текущая ёмкость", String.format("%.0f мВт·ч", maxCapacity));
+                }
+                if (designCapacity > 0) {
+                    info.put(prefix + "Проектная ёмкость", String.format("%.0f мВт·ч", designCapacity));
+
+                    // Износ батареи
+                    if (maxCapacity > 0) {
+                        double wear = 100.0 - (maxCapacity / designCapacity * 100);
+                        info.put(prefix + "Износ батареи", String.format("%.1f%%", wear));
+
+                        String wearStatus;
+                        if (wear < 10) wearStatus = "✅ Отличное состояние";
+                        else if (wear < 25) wearStatus = "✅ Хорошее";
+                        else if (wear < 40) wearStatus = "⚠ Среднее";
+                        else wearStatus = "⚠ Износ значительный";
+                        info.put(prefix + "Состояние батареи", wearStatus);
+                    }
+                }
+
+                // Напряжение
+                double voltage = ps.getVoltage();
+                if (voltage > 0) {
+                    info.put(prefix + "Напряжение", String.format("%.2f В", voltage));
+                }
+
+                // Сила тока
+                double amperage = ps.getAmperage();
+                if (amperage != 0) {
+                    info.put(prefix + "Сила тока", String.format("%.0f мА", amperage));
+                }
+
+                // Температура батареи
+                double temperature = ps.getTemperature();
+                if (temperature > 0) {
+                    info.put(prefix + "Температура батареи", String.format("%.1f °C", temperature));
+                }
+
+                // Циклы зарядки
+                int cycleCount = ps.getCycleCount();
+                if (cycleCount > 0) {
+                    info.put(prefix + "Циклов зарядки", String.valueOf(cycleCount));
+                }
+
+                // Химия
+                String chemistry = ps.getChemistry();
+                if (chemistry != null && !chemistry.isEmpty()) {
+                    info.put(prefix + "Химический состав", chemistry);
+                }
+
+                // Дата производства
+                LocalDate manufactureDate = ps.getManufactureDate();
+                if (manufactureDate != null) {
+                    info.put(prefix + "Дата производства", manufactureDate.toString());
+                }
+
+                idx++;
+            }
+        } catch (Exception e) {
+            info.put("Ошибка", e.getMessage());
+        }
+        return info;
+    }
+
+    // ⭐ НОВЫЙ МЕТОД: Безопасность (антивирус и брандмауэр)
+    private Map<String, String> getSecurityInfo() {
+        Map<String, String> info = new LinkedHashMap<>();
+        try {
+            // Информация об антивирусе (только Windows через WMI)
+            String osName = System.getProperty("os.name").toLowerCase();
+
+            if (osName.contains("win")) {
+                // Получаем антивирус через PowerShell
+                String antivirusInfo = getWindowsAntivirusInfo();
+                if (antivirusInfo != null && !antivirusInfo.isEmpty()) {
+                    info.put("🛡 Антивирус", antivirusInfo);
+                } else {
+                    info.put("🛡 Антивирус", "Информация недоступна");
+                }
+
+                // Статус брандмауэра Windows
+                String firewallStatus = getWindowsFirewallStatus();
+                if (firewallStatus != null) {
+                    info.put("🔥 Брандмауэр Windows", firewallStatus);
+                }
+
+                // Защитник Windows
+                String defenderStatus = getWindowsDefenderStatus();
+                if (defenderStatus != null) {
+                    info.put("🛡 Защитник Windows", defenderStatus);
+                }
+
+                // UAC статус
+                info.put("👤 User Account Control (UAC)", checkUAC());
+
+            } else if (osName.contains("linux")) {
+                info.put("Брандмауэр", "Linux — проверьте iptables/ufw вручную");
+                info.put("Антивирус", "Linux — обычно не требуется");
+            } else if (osName.contains("mac")) {
+                info.put("Брандмауэр", "macOS встроенный");
+            }
+
+        } catch (Exception e) {
+            info.put("Ошибка", e.getMessage());
+        }
+        return info;
+    }
+
+    private String getWindowsAntivirusInfo() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "powershell.exe",
+                    "-Command",
+                    "Get-CimInstance -Namespace 'root\\SecurityCenter2' -ClassName 'AntiVirusProduct' | Select-Object -ExpandProperty displayName"
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+
+            StringBuilder result = new StringBuilder();
+            try (var reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(p.getInputStream(), "Cp866"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.trim().isEmpty()) {
+                        if (result.length() > 0) result.append(", ");
+                        result.append(line.trim());
+                    }
+                }
+            }
+
+            p.waitFor();
+
+            String output = result.toString().trim();
+            return output.isEmpty() ? "Не обнаружен" : output;
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getWindowsFirewallStatus() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "powershell.exe",
+                    "-Command",
+                    "Get-NetFirewallProfile | Select-Object Name, Enabled | Format-Table -HideTableHeaders"
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+
+            StringBuilder result = new StringBuilder();
+            try (var reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(p.getInputStream(), "Cp866"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.trim().isEmpty()) {
+                        String[] parts = line.trim().split("\\s+");
+                        if (parts.length >= 2) {
+                            String profile = parts[0];
+                            String enabled = parts[1].equalsIgnoreCase("True") ? "✅ Включён" : "❌ Выключен";
+                            if (result.length() > 0) result.append(" | ");
+                            result.append(profile).append(": ").append(enabled);
+                        }
+                    }
+                }
+            }
+
+            p.waitFor();
+            return result.length() > 0 ? result.toString() : "Статус неизвестен";
+
+        } catch (Exception e) {
+            return "Ошибка получения статуса";
+        }
+    }
+
+    private String getWindowsDefenderStatus() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "powershell.exe",
+                    "-Command",
+                    "Get-MpComputerStatus | Select-Object -ExpandProperty AntivirusEnabled"
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+
+            try (var reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(p.getInputStream(), "Cp866"))) {
+                String line = reader.readLine();
+                p.waitFor();
+                if (line != null) {
+                    return line.trim().equalsIgnoreCase("True") ? "✅ Включён" : "❌ Выключен";
+                }
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
+    }
+
+    private String checkUAC() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "reg", "query",
+                    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+                    "/v", "EnableLUA"
+            );
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+
+            try (var reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(p.getInputStream(), "Cp866"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("EnableLUA")) {
+                        if (line.contains("0x1")) return "✅ Включён";
+                        else if (line.contains("0x0")) return "❌ Выключен";
+                    }
+                }
+            }
+            p.waitFor();
+        } catch (Exception e) {
+            return "Не удалось определить";
+        }
+        return "Не удалось определить";
     }
 
     private Map<String, String> getJavaInfo() {
