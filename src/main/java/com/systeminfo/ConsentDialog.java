@@ -9,7 +9,6 @@ import java.util.Map;
 
 public class ConsentDialog {
 
-    // Чекбоксы категорий
     private final JCheckBox cbOS = new JCheckBox("Операционная система", true);
     private final JCheckBox cbCPU = new JCheckBox("Процессор (CPU)", true);
     private final JCheckBox cbRAM = new JCheckBox("Оперативная память (RAM)", true);
@@ -23,7 +22,7 @@ public class ConsentDialog {
     public void showConsentDialog() {
         JFrame frame = new JFrame("Сбор информации о системе");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(680, 680);
+        frame.setSize(680, 700);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
@@ -55,7 +54,6 @@ public class ConsentDialog {
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Панель чекбоксов
         JPanel checkboxPanel = new JPanel();
         checkboxPanel.setLayout(new BoxLayout(checkboxPanel, BoxLayout.Y_AXIS));
         checkboxPanel.setBorder(BorderFactory.createTitledBorder(
@@ -87,7 +85,6 @@ public class ConsentDialog {
         centerPanel.add(checkboxPanel);
         centerPanel.add(Box.createVerticalStrut(10));
 
-        // Информационная панель о месте сохранения
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setBorder(BorderFactory.createTitledBorder(
@@ -162,36 +159,20 @@ public class ConsentDialog {
         buttonPanel.add(agreeButton);
         buttonPanel.add(declineButton);
 
-        // ⭐ НОВАЯ ПАНЕЛЬ: кнопка "Прочитать гарантии заново"
-        JPanel termsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        termsPanel.setBorder(new EmptyBorder(0, 0, 5, 0));
+        // ⭐ Панель с кнопкой "Прочитать гарантии заново"
+        JPanel termsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));
+        termsPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
-        JButton showTermsBtn = new JButton("🔒 Прочитать гарантии конфиденциальности заново");
-        showTermsBtn.setFont(new Font("SansSerif", Font.ITALIC, 12));
-        showTermsBtn.setForeground(new Color(33, 100, 200));
-        showTermsBtn.setBackground(null);
-        showTermsBtn.setBorderPainted(false);
-        showTermsBtn.setContentAreaFilled(false);
-        showTermsBtn.setFocusPainted(false);
-        showTermsBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Эффект подчёркивания при наведении
-        showTermsBtn.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                showTermsBtn.setText("<html><u>🔒 Прочитать гарантии конфиденциальности заново</u></html>");
-                showTermsBtn.setForeground(new Color(20, 60, 150));
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                showTermsBtn.setText("🔒 Прочитать гарантии конфиденциальности заново");
-                showTermsBtn.setForeground(new Color(33, 100, 200));
-            }
-        });
+        JButton showTermsBtn = createStyledButton(
+                "🔒 Прочитать гарантии конфиденциальности",
+                new Color(33, 150, 243),
+                new Color(13, 71, 161)
+        );
+        showTermsBtn.setPreferredSize(new Dimension(360, 38));
+        showTermsBtn.setFont(new Font("SansSerif", Font.BOLD, 13));
 
         showTermsBtn.addActionListener(e -> {
             frame.dispose();
-            // Показываем окно гарантий
             new WelcomeDialog().show();
         });
 
