@@ -182,7 +182,7 @@ public class WelcomeDialog {
                 
                 <h2 style='color: #1e5128; margin-top: 0;'>🛡 100% Конфиденциальность</h2>
                 
-                <p><b>System Info Collector</b> — это полностью локальное приложение, 
+                <p><b>System Info</b> — это полностью локальное приложение, 
                 которое работает только на вашем компьютере. Мы гарантируем:</p>
                 
                 <hr style='border: 1px solid #d0e0d0;'>

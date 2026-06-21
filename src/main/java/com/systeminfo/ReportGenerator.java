@@ -211,7 +211,7 @@ public class ReportGenerator {
                   <div class="container">
                     <div class="header">
                       <h1>🖥 Отчёт о характеристиках компьютера</h1>
-                      <p class="subtitle">System Info Collector v1.0 • Данные собраны с согласия пользователя</p>
+                      <p class="subtitle">System Info v1.0 • Данные собраны с согласия пользователя</p>
                 """);
 
         html.append("      <p class=\"date\">📅 ").append(date).append("</p>\n");
@@ -238,7 +238,7 @@ public class ReportGenerator {
         }
 
         html.append("    <div class=\"footer\">\n");
-        html.append("      <p>System Info Collector v1.0 • Отчёт сформирован ").append(date).append("</p>\n");
+        html.append("      <p>System Info v1.0 • Отчёт сформирован ").append(date).append("</p>\n");
         html.append("      <p>Всего секций: ").append(data.size()).append(" • Данные собраны с согласия пользователя</p>\n");
         html.append("    </div>\n");
         html.append("  </div>\n</body>\n</html>");
