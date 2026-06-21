@@ -10,10 +10,18 @@ public class Main {
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> {
-            // Сначала показываем окно с гарантиями конфиденциальности
-            WelcomeDialog welcome = new WelcomeDialog();
-            welcome.show();
-            // После закрытия окна приветствия запустится ConsentDialog
+            UserPreferences prefs = new UserPreferences();
+
+            if (prefs.hasAgreedToTerms()) {
+                // Пользователь уже согласился — сразу к выбору категорий
+                System.out.println("Пользователь уже принял гарантии (" + prefs.getAgreementDate() + ")");
+                new ConsentDialog().showConsentDialog();
+            } else {
+                // Первый запуск — показываем гарантии
+                System.out.println("Первый запуск — показываем гарантии");
+                WelcomeDialog welcome = new WelcomeDialog();
+                welcome.show();
+            }
         });
     }
 }

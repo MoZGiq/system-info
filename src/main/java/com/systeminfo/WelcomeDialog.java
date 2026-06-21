@@ -8,8 +8,6 @@ import java.awt.*;
 /**
  * Окно приветствия с гарантиями конфиденциальности.
  * Показывается при первом запуске приложения.
- * Пользователь должен прокрутить весь текст и подтвердить ознакомление,
- * прежде чем сможет нажать кнопку "Продолжить".
  */
 public class WelcomeDialog {
 
@@ -17,11 +15,7 @@ public class WelcomeDialog {
     private JButton continueButton;
     private JCheckBox cbAccepted;
     private JScrollPane scrollPane;
-    private boolean scrolledToBottom = false;
 
-    /**
-     * Показывает окно приветствия. После закрытия запускается основной диалог.
-     */
     public void show() {
         frame = new JFrame("Добро пожаловать — System Info");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -70,7 +64,7 @@ public class WelcomeDialog {
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // ===== ТЕКСТ ГАРАНТИЙ (со скроллом) =====
+        // ===== ТЕКСТ ГАРАНТИЙ =====
         JTextPane textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setContentType("text/html");
@@ -88,9 +82,7 @@ public class WelcomeDialog {
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
             JScrollBar sb = scrollPane.getVerticalScrollBar();
             int maxValue = sb.getMaximum() - sb.getVisibleAmount();
-            // Если прокрутили почти до конца (с допуском 20px)
             if (sb.getValue() >= maxValue - 20) {
-                scrolledToBottom = true;
                 cbAccepted.setEnabled(true);
                 cbAccepted.setText("✓ Я прочитал(а) и понимаю гарантии конфиденциальности");
                 cbAccepted.setForeground(new Color(30, 100, 30));
@@ -105,7 +97,6 @@ public class WelcomeDialog {
         bottomPanel.setOpaque(false);
         bottomPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
 
-        // Подсказка про прокрутку
         JLabel hintLabel = new JLabel(
                 "⬇ Прокрутите текст до конца, чтобы продолжить",
                 SwingConstants.CENTER);
@@ -115,7 +106,7 @@ public class WelcomeDialog {
         hintLabel.setBorder(new EmptyBorder(5, 0, 10, 0));
         bottomPanel.add(hintLabel);
 
-        // Чекбокс подтверждения (изначально выключен)
+        // Чекбокс подтверждения
         cbAccepted = new JCheckBox("⏳ Сначала прокрутите текст до конца...");
         cbAccepted.setFont(new Font("SansSerif", Font.BOLD, 13));
         cbAccepted.setOpaque(false);
@@ -141,24 +132,29 @@ public class WelcomeDialog {
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         buttonsPanel.setOpaque(false);
 
-        continueButton = new JButton("▶ Продолжить");
-        continueButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-        continueButton.setBackground(new Color(46, 125, 50));
-        continueButton.setForeground(Color.WHITE);
-        continueButton.setFocusPainted(false);
+        // ✅ Кнопка "Продолжить" с ЧЁРНЫМ текстом
+        continueButton = createStyledButton(
+                "▶ Продолжить",
+                new Color(76, 175, 80),
+                new Color(46, 125, 50)
+        );
         continueButton.setPreferredSize(new Dimension(200, 42));
         continueButton.setEnabled(false);
         continueButton.addActionListener(e -> {
+            // ✅ Сохраняем согласие пользователя
+            UserPreferences prefs = new UserPreferences();
+            prefs.setAgreedToTerms();
+
             frame.dispose();
-            // Запускаем основной диалог
             new ConsentDialog().showConsentDialog();
         });
 
-        JButton exitButton = new JButton("✕ Выйти");
-        exitButton.setFont(new Font("SansSerif", Font.BOLD, 14));
-        exitButton.setBackground(new Color(120, 120, 120));
-        exitButton.setForeground(Color.WHITE);
-        exitButton.setFocusPainted(false);
+        // ✅ Кнопка "Выйти" с ЧЁРНЫМ текстом
+        JButton exitButton = createStyledButton(
+                "✕ Выйти",
+                new Color(158, 158, 158),
+                new Color(97, 97, 97)
+        );
         exitButton.setPreferredSize(new Dimension(150, 42));
         exitButton.addActionListener(e -> System.exit(0));
 
@@ -173,6 +169,47 @@ public class WelcomeDialog {
     }
 
     /**
+     * Создаёт стилизованную кнопку с ЧЁРНЫМ текстом и цветной рамкой.
+     */
+    private JButton createStyledButton(String text, Color bgColor, Color borderColor) {
+        JButton button = new JButton(text) {
+            @Override
+            public void setEnabled(boolean enabled) {
+                super.setEnabled(enabled);
+                // Чёрный текст всегда, даже когда disabled
+                setForeground(enabled ? Color.BLACK : new Color(100, 100, 100));
+            }
+        };
+        button.setFont(new Font("SansSerif", Font.BOLD, 14));
+        button.setForeground(Color.BLACK);
+        button.setBackground(new Color(240, 240, 240));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(borderColor, 2),
+                BorderFactory.createEmptyBorder(5, 15, 5, 15)
+        ));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(true);
+
+        Color hoverBg = bgColor.brighter();
+        Color defaultBg = new Color(240, 240, 240);
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(hoverBg);
+                }
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(defaultBg);
+            }
+        });
+
+        return button;
+    }
+
+    /**
      * Возвращает HTML-текст с гарантиями конфиденциальности.
      */
     private String getGuaranteeHtml() {
@@ -182,7 +219,7 @@ public class WelcomeDialog {
                 
                 <h2 style='color: #1e5128; margin-top: 0;'>🛡 100% Конфиденциальность</h2>
                 
-                <p><b>System Info</b> — это полностью локальное приложение, 
+                <p><b>System Info</b> — это полностью локальное приложение,
                 которое работает только на вашем компьютере. Мы гарантируем:</p>
                 
                 <hr style='border: 1px solid #d0e0d0;'>
@@ -204,7 +241,6 @@ public class WelcomeDialog {
                   <li>Использует только <b>открытые библиотеки</b> с открытым исходным кодом:
                     <ul>
                       <li><b>OSHI</b> (MIT License) — сбор системной информации</li>
-                      <li><b>Gson</b> (Apache 2.0) — работа с JSON</li>
                       <li><b>SLF4J</b> (MIT License) — логирование</li>
                     </ul>
                   </li>
@@ -215,8 +251,8 @@ public class WelcomeDialog {
                   <li>Без вашего <b>явного согласия</b> ничего не собирается</li>
                   <li>Вы выбираете <b>какие именно</b> категории данных собирать</li>
                   <li>Вы можете <b>отказаться</b> в любой момент</li>
-                  <li>Все результаты <b>отображаются на экране</b> перед сохранением</li>
-                  <li>Вы видите <b>точный путь</b> сохранения файла</li>
+                  <li>Все результаты <b>сохраняются на ваш Рабочий стол</b></li>
+                  <li>Файл хранится <b>только локально</b></li>
                 </ul>
                 
                 <h3 style='color: #1565c0;'>📊 4. Какие данные собираются</h3>
@@ -260,19 +296,23 @@ public class WelcomeDialog {
                 <hr style='border: 1px solid #d0e0d0;'>
                 
                 <div style='background: #e8f5e9; padding: 12px; border-left: 4px solid #2e7d32; margin: 15px 0;'>
-                  <p style='margin: 0;'><b>✅ Итог:</b> Используя эту программу, вы получаете 
-                  удобный инструмент для сбора характеристик вашего компьютера, 
-                  при этом <b>ваша приватность полностью защищена</b>. 
+                  <p style='margin: 0;'><b>✅ Итог:</b> Используя эту программу, вы получаете
+                  удобный инструмент для сбора характеристик вашего компьютера,
+                  при этом <b>ваша приватность полностью защищена</b>.
                   Все данные остаются под вашим контролем.</p>
                 </div>
                 
                 <p style='text-align: center; color: #888; font-size: 11px; margin-top: 20px;'>
-                  <i>Прочитав этот текст до конца, вы можете подтвердить ознакомление 
+                  <i>Прочитав этот текст до конца, вы можете подтвердить ознакомление
                   и продолжить работу с программой.</i>
                 </p>
                 
                 <p style='text-align: center; color: #2e7d32; font-size: 14px; font-weight: bold;'>
                   ⬇ Вы достигли конца текста ⬇
+                </p>
+                
+                <p style='text-align: center; color: #888; font-size: 11px; margin-top: 15px;'>
+                  <i>После согласия гарантии больше не будут показываться при следующих запусках.</i>
                 </p>
                 
                 </body>
