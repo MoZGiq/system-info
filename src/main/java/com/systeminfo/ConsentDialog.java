@@ -11,43 +11,43 @@ public class ConsentDialog {
 
     private final JCheckBox cbOS = new JCheckBox("Операционная система", true);
     private final JCheckBox cbCPU = new JCheckBox("Процессор (CPU)", true);
-    private final JCheckBox cbSensors = new JCheckBox("Датчики (температура CPU)", true);
+    private final JCheckBox cbSensors = new JCheckBox("🌡 Датчики (температура CPU)", true);
     private final JCheckBox cbRAM = new JCheckBox("Оперативная память (RAM)", true);
     private final JCheckBox cbGPU = new JCheckBox("Видеокарта (GPU)", true);
     private final JCheckBox cbDisks = new JCheckBox("Диски и хранилища", true);
     private final JCheckBox cbNetwork = new JCheckBox("Сетевые интерфейсы", true);
-    private final JCheckBox cbConnections = new JCheckBox("Активные сетевые соединения", true);
+    private final JCheckBox cbConnections = new JCheckBox("🌐 Активные сетевые соединения", true);
     private final JCheckBox cbMotherboard = new JCheckBox("Материнская плата", true);
     private final JCheckBox cbDisplay = new JCheckBox("Дисплей", true);
-    private final JCheckBox cbBattery = new JCheckBox("Аккумулятор", true);
-    private final JCheckBox cbSecurity = new JCheckBox("Безопасность (антивирус и брандмауэр)", true);
+    private final JCheckBox cbBattery = new JCheckBox("🔋 Аккумулятор", true);
+    private final JCheckBox cbSecurity = new JCheckBox("🛡 Безопасность (антивирус и брандмауэр)", true);
     private final JCheckBox cbJava = new JCheckBox("Среда Java", true);
+
+    // ⭐ Поля для email
+    private JCheckBox cbSendEmail;
+    private JTextField tfEmail;
 
     public void showConsentDialog() {
         JFrame frame = new JFrame("Сбор информации о системе");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(680, 820);
+        frame.setSize(700, 920);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
-        // ⭐ Проверяем тип устройства
         UserPreferences prefs = new UserPreferences();
         boolean isLaptop = prefs.isLaptop();
 
-        // Для ПК скрываем/отключаем аккумулятор
         if (!isLaptop) {
             cbBattery.setSelected(false);
             cbBattery.setEnabled(false);
-            cbBattery.setText("Аккумулятор (только для ноутбуков)");
+            cbBattery.setText("🔋 Аккумулятор (только для ноутбуков)");
             cbBattery.setForeground(Color.GRAY);
         }
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // ===== Верхняя панель =====
         JPanel headerPanel = new JPanel(new BorderLayout(5, 5));
-
         String deviceIcon = isLaptop ? "💻" : "🖥";
         String deviceText = isLaptop ? "ноутбук" : "стационарный ПК";
 
@@ -58,7 +58,7 @@ public class ConsentDialog {
         JTextArea descriptionArea = new JTextArea(
                 "Данное приложение собирает технические характеристики вашего " + deviceText + ".\n\n" +
                         "📌 Отчёт сохраняется в формате HTML на ваш Рабочий стол.\n" +
-                        "📌 Данные сохраняются ТОЛЬКО локально на вашем компьютере.\n" +
+                        "📌 Опционально: можно отправить на email.\n" +
                         "📌 Без вашего согласия ничего не будет собрано."
         );
         descriptionArea.setEditable(false);
@@ -73,6 +73,7 @@ public class ConsentDialog {
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
+        // Панель чекбоксов категорий
         JPanel checkboxPanel = new JPanel();
         checkboxPanel.setLayout(new BoxLayout(checkboxPanel, BoxLayout.Y_AXIS));
         checkboxPanel.setBorder(BorderFactory.createTitledBorder(
@@ -113,6 +114,7 @@ public class ConsentDialog {
         centerPanel.add(checkboxPanel);
         centerPanel.add(Box.createVerticalStrut(10));
 
+        // Панель сохранения
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setBorder(BorderFactory.createTitledBorder(
@@ -134,12 +136,63 @@ public class ConsentDialog {
         infoPanel.add(lblInfo);
 
         centerPanel.add(infoPanel);
+        centerPanel.add(Box.createVerticalStrut(10));
+
+        // ⭐ ПАНЕЛЬ EMAIL
+        JPanel emailPanel = new JPanel();
+        emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.Y_AXIS));
+        emailPanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "📧 Отправка на Email (опционально):",
+                TitledBorder.LEFT, TitledBorder.TOP,
+                new Font("SansSerif", Font.BOLD, 13)));
+        emailPanel.setBackground(new Color(255, 250, 245));
+
+        cbSendEmail = new JCheckBox("📧 Отправить копию отчёта на email");
+        cbSendEmail.setFont(new Font("SansSerif", Font.BOLD, 13));
+        cbSendEmail.setAlignmentX(Component.LEFT_ALIGNMENT);
+        cbSendEmail.setOpaque(false);
+        emailPanel.add(cbSendEmail);
+        emailPanel.add(Box.createVerticalStrut(8));
+
+        JPanel emailRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+        emailRow.setOpaque(false);
+        emailRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        emailRow.add(lblEmail);
+
+        tfEmail = new JTextField(25);
+        tfEmail.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        tfEmail.setEnabled(false);
+        emailRow.add(tfEmail);
+
+        emailPanel.add(emailRow);
+
+        JLabel lblEmailWarning = new JLabel(
+                "<html><div style='padding: 5px; color: #c62828;'>" +
+                        "⚠ <b>ВНИМАНИЕ!</b> Согласие на отправку означает, что отчёт<br>" +
+                        "будет передан через интернет на указанный адрес." +
+                        "</div></html>");
+        lblEmailWarning.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        lblEmailWarning.setAlignmentX(Component.LEFT_ALIGNMENT);
+        emailPanel.add(lblEmailWarning);
+
+        cbSendEmail.addActionListener(e -> {
+            tfEmail.setEnabled(cbSendEmail.isSelected());
+            if (cbSendEmail.isSelected()) {
+                tfEmail.requestFocus();
+            }
+        });
+
+        centerPanel.add(emailPanel);
 
         JScrollPane scroll = new JScrollPane(centerPanel);
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         mainPanel.add(scroll, BorderLayout.CENTER);
 
+        // НИЖНЯЯ ПАНЕЛЬ
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
 
@@ -171,8 +224,32 @@ public class ConsentDialog {
                 return;
             }
 
+            // ⭐ Проверка email
+            String email = null;
+            if (cbSendEmail.isSelected()) {
+                email = tfEmail.getText().trim();
+                if (!EmailSender.isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Введите корректный email адрес!\n\nПример: example@gmail.com",
+                            "Неверный email", JOptionPane.WARNING_MESSAGE);
+                    tfEmail.requestFocus();
+                    return;
+                }
+
+                int confirm = JOptionPane.showConfirmDialog(frame,
+                        "Вы уверены, что хотите отправить отчёт на email?\n\n" +
+                                "📧 " + email + "\n\n" +
+                                "Отчёт будет передан через интернет.",
+                        "Подтверждение отправки", JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+
+                if (confirm != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
             frame.dispose();
-            collectAndSave();
+            collectAndSave(email);
         });
 
         declineButton.addActionListener(e -> {
@@ -196,7 +273,6 @@ public class ConsentDialog {
         );
         showTermsBtn.setPreferredSize(new Dimension(200, 36));
         showTermsBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
-
         showTermsBtn.addActionListener(e -> {
             frame.dispose();
             new WelcomeDialog().show();
@@ -209,7 +285,6 @@ public class ConsentDialog {
         );
         changeDeviceBtn.setPreferredSize(new Dimension(230, 36));
         changeDeviceBtn.setFont(new Font("SansSerif", Font.BOLD, 12));
-
         changeDeviceBtn.addActionListener(e -> {
             frame.dispose();
             new DeviceTypeDialog().show();
@@ -268,7 +343,7 @@ public class ConsentDialog {
         return getDesktopPath() + File.separator + "system_report_" + deviceType + "_" + timestamp + ".html";
     }
 
-    private void collectAndSave() {
+    private void collectAndSave(String email) {
         JFrame progressFrame = new JFrame("Сбор данных...");
         progressFrame.setSize(450, 130);
         progressFrame.setLocationRelativeTo(null);
@@ -286,9 +361,10 @@ public class ConsentDialog {
         progressFrame.setContentPane(progressPanel);
         progressFrame.setVisible(true);
 
-        SwingWorker<Map<String, Map<String, String>>, Void> worker = new SwingWorker<>() {
+        SwingWorker<Map<String, Map<String, String>>, String> worker = new SwingWorker<>() {
             @Override
             protected Map<String, Map<String, String>> doInBackground() {
+                publish("⏳ Собираем информацию о системе...");
                 SystemInfoCollector collector = new SystemInfoCollector();
                 return collector.collect(
                         cbOS.isSelected(), cbCPU.isSelected(), cbRAM.isSelected(),
@@ -300,10 +376,18 @@ public class ConsentDialog {
             }
 
             @Override
+            protected void process(java.util.List<String> chunks) {
+                if (!chunks.isEmpty()) {
+                    statusLabel.setText(chunks.get(chunks.size() - 1));
+                }
+            }
+
+            @Override
             protected void done() {
-                progressFrame.dispose();
                 try {
                     Map<String, Map<String, String>> data = get();
+
+                    statusLabel.setText("💾 Сохраняем отчёт...");
 
                     String savedPath = buildReportPath();
 
@@ -313,9 +397,25 @@ public class ConsentDialog {
                     }
 
                     ReportGenerator.saveToHtml(data, savedPath);
-                    showSuccessDialog(savedPath);
+
+                    boolean emailSent = false;
+                    String emailError = null;
+                    if (email != null && !email.isBlank()) {
+                        try {
+                            statusLabel.setText("📧 Отправляем email...");
+                            EmailSender.sendReport(email, savedPath);
+                            emailSent = true;
+                        } catch (Exception emailEx) {
+                            emailError = emailEx.getMessage();
+                            emailEx.printStackTrace();
+                        }
+                    }
+
+                    progressFrame.dispose();
+                    showSuccessDialog(savedPath, email, emailSent, emailError);
 
                 } catch (Exception ex) {
+                    progressFrame.dispose();
                     JOptionPane.showMessageDialog(null,
                             "Ошибка при сборе/сохранении данных:\n" + ex.getMessage(),
                             "Ошибка", JOptionPane.ERROR_MESSAGE);
@@ -327,10 +427,10 @@ public class ConsentDialog {
         worker.execute();
     }
 
-    private void showSuccessDialog(String savedPath) {
+    private void showSuccessDialog(String savedPath, String email, boolean emailSent, String emailError) {
         JFrame frame = new JFrame("Успех");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(520, 360);
+        frame.setSize(560, 440);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
@@ -364,12 +464,26 @@ public class ConsentDialog {
         titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
         centerPanel.add(titleLabel);
 
-        JLabel messageLabel = new JLabel(
-                "<html><div style='text-align: center;'>" +
-                        "Файл находится на<br><b>вашем Рабочем столе</b>" +
-                        "</div></html>",
-                SwingConstants.CENTER);
-        messageLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        StringBuilder msg = new StringBuilder("<html><div style='text-align: center; padding: 10px;'>");
+        msg.append("Файл сохранён на<br><b>вашем Рабочем столе</b>");
+
+        if (email != null) {
+            msg.append("<br><br>");
+            if (emailSent) {
+                msg.append("<span style='color: #1565c0; font-size: 14px;'>")
+                        .append("📧 Отправлено на:<br><b>")
+                        .append(email).append("</b></span>");
+            } else {
+                msg.append("<span style='color: #c62828; font-size: 12px;'>")
+                        .append("⚠ Не удалось отправить на email:<br>")
+                        .append(emailError != null ? emailError.replace("\n", "<br>") : "Неизвестная ошибка")
+                        .append("</span>");
+            }
+        }
+        msg.append("</div></html>");
+
+        JLabel messageLabel = new JLabel(msg.toString(), SwingConstants.CENTER);
+        messageLabel.setFont(new Font("SansSerif", Font.PLAIN, 15));
         messageLabel.setForeground(new Color(46, 80, 50));
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
